@@ -1,0 +1,7 @@
+# Normalize to LF in the index and in working copies. Without this, Git warns
+# on every commit from Windows that it will convert LF to CRLF on checkout,
+# which also risks whole-file diffs for anyone cloning on another platform.
+* text=auto eol=lf
+
+# Recorded API responses are compared byte-for-byte by the test suite.
+tests/fixtures/** -text
