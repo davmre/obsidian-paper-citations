@@ -154,7 +154,7 @@ npm install
 echo 'C:\path\to\your\vault' > .vault-path   # or set OBSIDIAN_VAULT
 npm run dev      # watch, building straight into the vault
 npm run build    # typecheck, then minified build
-npm test         # 167 offline tests
+npm test         # 189 offline tests
 npm run smoke    # hits the real services; see below
 ```
 
