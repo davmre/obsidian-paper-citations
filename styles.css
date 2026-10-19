@@ -1,0 +1,56 @@
+.paper-citations-template-input {
+	width: 100%;
+	min-width: 18rem;
+	font-family: var(--font-monospace);
+	font-size: var(--font-smaller);
+	resize: vertical;
+}
+
+.paper-citations-preview {
+	display: flex;
+	flex-direction: column;
+	gap: 0.25rem;
+	margin: 0 0 1rem;
+	padding: 0.6rem 0.75rem;
+	border-radius: var(--radius-s);
+	background: var(--background-secondary);
+}
+
+.paper-citations-preview small {
+	color: var(--text-faint);
+	text-transform: uppercase;
+	letter-spacing: 0.04em;
+}
+
+.paper-citations-preview code {
+	font-size: var(--font-smaller);
+	white-space: pre-wrap;
+	word-break: break-word;
+	background: none;
+	padding: 0;
+}
+
+.paper-citations-variables {
+	margin: -0.5rem 0 1.25rem;
+	color: var(--text-muted);
+}
+
+.paper-citations-variable-list {
+	font-family: var(--font-monospace);
+	word-spacing: 0.3rem;
+}
+
+.paper-citations-preset-row .setting-item-control {
+	flex-wrap: wrap;
+	gap: 0.4rem;
+}
+
+.paper-citations-preset-template {
+	display: block;
+	color: var(--text-muted);
+	font-family: var(--font-monospace);
+	font-size: var(--font-smaller);
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}

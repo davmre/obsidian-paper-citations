@@ -1,0 +1,93 @@
+{
+  "status": "ok",
+  "message-type": "work",
+  "message": {
+    "title": [
+      "Deep learning"
+    ],
+    "author": [
+      {
+        "given": "Yann",
+        "family": "LeCun",
+        "sequence": "first",
+        "affiliation": [],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      },
+      {
+        "given": "Yoshua",
+        "family": "Bengio",
+        "sequence": "additional",
+        "affiliation": [],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      },
+      {
+        "given": "Geoffrey",
+        "family": "Hinton",
+        "sequence": "additional",
+        "affiliation": [],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      }
+    ],
+    "issued": {
+      "date-parts": [
+        [
+          2015,
+          5,
+          27
+        ]
+      ]
+    },
+    "created": {
+      "date-parts": [
+        [
+          2015,
+          5,
+          26
+        ]
+      ],
+      "date-time": "2015-05-26T12:10:15Z",
+      "timestamp": 1432642215000
+    },
+    "DOI": "10.1038/nature14539",
+    "URL": "https://doi.org/10.1038/nature14539",
+    "container-title": [
+      "Nature"
+    ],
+    "link": [
+      {
+        "URL": "http://www.nature.com/articles/nature14539.pdf",
+        "content-type": "application/pdf",
+        "content-version": "vor",
+        "intended-application": "text-mining"
+      },
+      {
+        "URL": "http://www.nature.com/articles/nature14539",
+        "content-type": "text/html",
+        "content-version": "vor",
+        "intended-application": "text-mining"
+      },
+      {
+        "URL": "http://www.nature.com/articles/nature14539.pdf",
+        "content-type": "application/pdf",
+        "content-version": "vor",
+        "intended-application": "similarity-checking"
+      }
+    ],
+    "publisher": "Springer Science and Business Media LLC"
+  }
+}

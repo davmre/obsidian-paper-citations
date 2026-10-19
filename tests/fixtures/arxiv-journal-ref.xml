@@ -1,0 +1,155 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<feed xmlns:opensearch="http://a9.com/-/spec/opensearch/1.1/" xmlns:arxiv="http://arxiv.org/schemas/atom" xmlns="http://www.w3.org/2005/Atom">
+  <id>https://arxiv.org/api/RjK0XFQIADQAF7Flf5oSY63DL7w</id>
+  <title>arXiv Query: search_query=&amp;id_list=astro-ph/9812133&amp;start=0&amp;max_results=1</title>
+  <updated>2026-10-19T20:06:13Z</updated>
+  <link href="https://arxiv.org/api/query?search_query=&amp;start=0&amp;max_results=1&amp;id_list=astro-ph/9812133" type="application/atom+xml"/>
+  <opensearch:itemsPerPage>1</opensearch:itemsPerPage>
+  <opensearch:totalResults>1</opensearch:totalResults>
+  <opensearch:startIndex>0</opensearch:startIndex>
+  <entry>
+    <id>http://arxiv.org/abs/astro-ph/9812133v1</id>
+    <title>Measurements of Omega and Lambda from 42 High-Redshift Supernovae</title>
+    <updated>1998-12-08T03:27:34Z</updated>
+    <link href="https://arxiv.org/abs/astro-ph/9812133v1" rel="alternate" type="text/html"/>
+    <link href="https://arxiv.org/pdf/astro-ph/9812133v1" rel="related" type="application/pdf" title="pdf"/>
+    <summary>  We report measurements of the mass density, Omega_M, and cosmological-constant energy density, Omega_Lambda, of the universe based on the analysis of 42 Type Ia supernovae discovered by the Supernova Cosmology Project. The magnitude-redshift data for these SNe, at redshifts between 0.18 and 0.83, are fit jointly with a set of SNe from the Calan/Tololo Supernova Survey, at redshifts below 0.1, to yield values for the cosmological parameters. All SN peak magnitudes are standardized using a SN Ia lightcurve width-luminosity relation. The measurement yields a joint probability distribution of the cosmological parameters that is approximated by the relation 0.8 Omega_M - 0.6 Omega_Lambda ~= -0.2 +/- 0.1 in the region of interest (Omega_M &lt;~ 1.5). For a flat (Omega_M + Omega_Lambda = 1) cosmology we find Omega_M = 0.28{+0.09,-0.08} (1 sigma statistical) {+0.05,-0.04} (identified systematics). The data are strongly inconsistent with a Lambda = 0 flat cosmology, the simplest inflationary universe model. An open, Lambda = 0 cosmology also does not fit the data well: the data indicate that the cosmological constant is non-zero and positive, with a confidence of P(Lambda &gt; 0) = 99%, including the identified systematic uncertainties. The best-fit age of the universe relative to the Hubble time is t_0 = 14.9{+1.4,-1.1} (0.63/h) Gyr for a flat cosmology. The size of our sample allows us to perform a variety of statistical tests to check for possible systematic errors and biases. We find no significant differences in either the host reddening distribution or Malmquist bias between the low-redshift Calan/Tololo sample and our high-redshift sample. The conclusions are robust whether or not a width-luminosity relation is used to standardize the SN peak magnitudes.</summary>
+    <category term="astro-ph" scheme="http://arxiv.org/schemas/atom"/>
+    <category term="hep-ex" scheme="http://arxiv.org/schemas/atom"/>
+    <category term="hep-ph" scheme="http://arxiv.org/schemas/atom"/>
+    <published>1998-12-08T03:27:34Z</published>
+    <arxiv:comment>21 pages and 10 figures. Accepted for publication in the Astrophysical Journal. Individual color figures, supplementary tables, and preprint also available at http://www-supernova.lbl.gov/</arxiv:comment>
+    <arxiv:primary_category term="astro-ph"/>
+    <arxiv:journal_ref>Astrophys.J.517:565-586,1999</arxiv:journal_ref>
+    <author>
+      <name>S. Perlmutter</name>
+      <arxiv:affiliation>The Supernova Cosmology Project</arxiv:affiliation>
+    </author>
+    <author>
+      <name>G. Aldering</name>
+      <arxiv:affiliation>The Supernova Cosmology Project</arxiv:affiliation>
+    </author>
+    <author>
+      <name>G. Goldhaber</name>
+      <arxiv:affiliation>The Supernova Cosmology Project</arxiv:affiliation>
+    </author>
+    <author>
+      <name>R. A. Knop</name>
+      <arxiv:affiliation>The Supernova Cosmology Project</arxiv:affiliation>
+    </author>
+    <author>
+      <name>P. Nugent</name>
+      <arxiv:affiliation>The Supernova Cosmology Project</arxiv:affiliation>
+    </author>
+    <author>
+      <name>P. G. Castro</name>
+      <arxiv:affiliation>The Supernova Cosmology Project</arxiv:affiliation>
+    </author>
+    <author>
+      <name>S. Deustua</name>
+      <arxiv:affiliation>The Supernova Cosmology Project</arxiv:affiliation>
+    </author>
+    <author>
+      <name>S. Fabbro</name>
+      <arxiv:affiliation>The Supernova Cosmology Project</arxiv:affiliation>
+    </author>
+    <author>
+      <name>A. Goobar</name>
+      <arxiv:affiliation>The Supernova Cosmology Project</arxiv:affiliation>
+    </author>
+    <author>
+      <name>D. E. Groom</name>
+      <arxiv:affiliation>The Supernova Cosmology Project</arxiv:affiliation>
+    </author>
+    <author>
+      <name>I. M. Hook</name>
+      <arxiv:affiliation>The Supernova Cosmology Project</arxiv:affiliation>
+    </author>
+    <author>
+      <name>A. G. Kim</name>
+      <arxiv:affiliation>The Supernova Cosmology Project</arxiv:affiliation>
+    </author>
+    <author>
+      <name>M. Y. Kim</name>
+      <arxiv:affiliation>The Supernova Cosmology Project</arxiv:affiliation>
+    </author>
+    <author>
+      <name>J. C. Lee</name>
+      <arxiv:affiliation>The Supernova Cosmology Project</arxiv:affiliation>
+    </author>
+    <author>
+      <name>N. J. Nunes</name>
+      <arxiv:affiliation>The Supernova Cosmology Project</arxiv:affiliation>
+    </author>
+    <author>
+      <name>R. Pain</name>
+      <arxiv:affiliation>The Supernova Cosmology Project</arxiv:affiliation>
+    </author>
+    <author>
+      <name>C. R. Pennypacker</name>
+      <arxiv:affiliation>The Supernova Cosmology Project</arxiv:affiliation>
+    </author>
+    <author>
+      <name>R. Quimby</name>
+      <arxiv:affiliation>The Supernova Cosmology Project</arxiv:affiliation>
+    </author>
+    <author>
+      <name>C. Lidman</name>
+      <arxiv:affiliation>The Supernova Cosmology Project</arxiv:affiliation>
+    </author>
+    <author>
+      <name>R. S. Ellis</name>
+      <arxiv:affiliation>The Supernova Cosmology Project</arxiv:affiliation>
+    </author>
+    <author>
+      <name>M. Irwin</name>
+      <arxiv:affiliation>The Supernova Cosmology Project</arxiv:affiliation>
+    </author>
+    <author>
+      <name>R. G. McMahon</name>
+      <arxiv:affiliation>The Supernova Cosmology Project</arxiv:affiliation>
+    </author>
+    <author>
+      <name>P. Ruiz-Lapuente</name>
+      <arxiv:affiliation>The Supernova Cosmology Project</arxiv:affiliation>
+    </author>
+    <author>
+      <name>N. Walton</name>
+      <arxiv:affiliation>The Supernova Cosmology Project</arxiv:affiliation>
+    </author>
+    <author>
+      <name>B. Schaefer</name>
+      <arxiv:affiliation>The Supernova Cosmology Project</arxiv:affiliation>
+    </author>
+    <author>
+      <name>B. J. Boyle</name>
+      <arxiv:affiliation>The Supernova Cosmology Project</arxiv:affiliation>
+    </author>
+    <author>
+      <name>A. V. Filippenko</name>
+      <arxiv:affiliation>The Supernova Cosmology Project</arxiv:affiliation>
+    </author>
+    <author>
+      <name>T. Matheson</name>
+      <arxiv:affiliation>The Supernova Cosmology Project</arxiv:affiliation>
+    </author>
+    <author>
+      <name>A. S. Fruchter</name>
+      <arxiv:affiliation>The Supernova Cosmology Project</arxiv:affiliation>
+    </author>
+    <author>
+      <name>N. Panagia</name>
+      <arxiv:affiliation>The Supernova Cosmology Project</arxiv:affiliation>
+    </author>
+    <author>
+      <name>H. J. M. Newberg</name>
+      <arxiv:affiliation>The Supernova Cosmology Project</arxiv:affiliation>
+    </author>
+    <author>
+      <name>W. J. Couch</name>
+      <arxiv:affiliation>The Supernova Cosmology Project</arxiv:affiliation>
+    </author>
+    <arxiv:doi>10.1086/307221</arxiv:doi>
+    <link rel="related" href="https://doi.org/10.1086/307221" title="doi"/>
+  </entry>
+</feed>

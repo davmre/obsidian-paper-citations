@@ -1,0 +1,9 @@
+{
+  "id": "paper-citations",
+  "name": "Paper Citations",
+  "version": "1.0.0",
+  "minAppVersion": "1.4.0",
+  "description": "Paste an arXiv, DOI, LessWrong or other paper link and get a formatted citation with title and authors.",
+  "author": "Dave Moore",
+  "isDesktopOnly": false
+}

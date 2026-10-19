@@ -1,0 +1,33 @@
+{
+  "name": "obsidian-paper-citations",
+  "version": "1.0.0",
+  "description": "Turn pasted paper links (arXiv, DOI, LessWrong, and more) into formatted citations.",
+  "main": "main.js",
+  "type": "module",
+  "scripts": {
+    "dev": "node esbuild.config.mjs",
+    "build": "tsc -noEmit -skipLibCheck && node esbuild.config.mjs production",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "smoke": "vitest run --config vitest.live.config.ts"
+  },
+  "keywords": [
+    "obsidian",
+    "arxiv",
+    "citation",
+    "doi"
+  ],
+  "license": "MIT",
+  "devDependencies": {
+    "@types/node": "^22.10.0",
+    "builtin-modules": "^4.0.0",
+    "esbuild": "^0.24.0",
+    "obsidian": "latest",
+    "tslib": "^2.8.0",
+    "typescript": "^5.7.0",
+    "vitest": "^2.1.0"
+  },
+  "dependencies": {
+    "jsdom": "^25.0.1"
+  }
+}

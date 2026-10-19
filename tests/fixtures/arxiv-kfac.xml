@@ -1,0 +1,30 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<feed xmlns:opensearch="http://a9.com/-/spec/opensearch/1.1/" xmlns:arxiv="http://arxiv.org/schemas/atom" xmlns="http://www.w3.org/2005/Atom">
+  <id>https://arxiv.org/api/l4Un4PXWny2VrLF+5+ed/XdX2NQ</id>
+  <title>arXiv Query: search_query=&amp;id_list=1503.05671&amp;start=0&amp;max_results=1</title>
+  <updated>2026-10-19T20:05:30Z</updated>
+  <link href="https://arxiv.org/api/query?search_query=&amp;start=0&amp;max_results=1&amp;id_list=1503.05671" type="application/atom+xml"/>
+  <opensearch:itemsPerPage>1</opensearch:itemsPerPage>
+  <opensearch:totalResults>1</opensearch:totalResults>
+  <opensearch:startIndex>0</opensearch:startIndex>
+  <entry>
+    <id>http://arxiv.org/abs/1503.05671v7</id>
+    <title>Optimizing Neural Networks with Kronecker-factored Approximate Curvature</title>
+    <updated>2020-06-08T01:28:58Z</updated>
+    <link href="https://arxiv.org/abs/1503.05671v7" rel="alternate" type="text/html"/>
+    <link href="https://arxiv.org/pdf/1503.05671v7" rel="related" type="application/pdf" title="pdf"/>
+    <summary>We propose an efficient method for approximating natural gradient descent in neural networks which we call Kronecker-Factored Approximate Curvature (K-FAC). K-FAC is based on an efficiently invertible approximation of a neural network's Fisher information matrix which is neither diagonal nor low-rank, and in some cases is completely non-sparse. It is derived by approximating various large blocks of the Fisher (corresponding to entire layers) as being the Kronecker product of two much smaller matrices. While only several times more expensive to compute than the plain stochastic gradient, the updates produced by K-FAC make much more progress optimizing the objective, which results in an algorithm that can be much faster than stochastic gradient descent with momentum in practice. And unlike some previously proposed approximate natural-gradient/Newton methods which use high-quality non-diagonal curvature matrices (such as Hessian-free optimization), K-FAC works very well in highly stochastic optimization regimes. This is because the cost of storing and inverting K-FAC's approximation to the curvature matrix does not depend on the amount of data used to estimate it, which is a feature typically associated only with diagonal or low-rank approximations to the curvature matrix.</summary>
+    <category term="cs.LG" scheme="http://arxiv.org/schemas/atom"/>
+    <category term="cs.NE" scheme="http://arxiv.org/schemas/atom"/>
+    <category term="stat.ML" scheme="http://arxiv.org/schemas/atom"/>
+    <published>2015-03-19T08:30:24Z</published>
+    <arxiv:comment>Reduction ratio formula corrected. Removed incorrect claim about geodesics in footnote</arxiv:comment>
+    <arxiv:primary_category term="cs.LG"/>
+    <author>
+      <name>James Martens</name>
+    </author>
+    <author>
+      <name>Roger Grosse</name>
+    </author>
+  </entry>
+</feed>
