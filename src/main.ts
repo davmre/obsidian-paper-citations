@@ -17,7 +17,7 @@ import {
 	type PendingReplacement,
 } from "./paste";
 import { findLinks, linkAt } from "./links";
-import { buildResolvers, recognize, resolveText } from "./resolvers/index";
+import { buildResolvers, isSpecificLink, recognize, resolveText } from "./resolvers/index";
 import { PaperCitationsSettingTab } from "./settings";
 import { buildVars, render } from "./template";
 import type { FetchContext, PaperCitationsSettings, PaperMetadata, Resolver } from "./types";
@@ -55,16 +55,6 @@ export default class PaperCitationsPlugin extends Plugin {
 		this.registerEvent(
 			this.app.workspace.on("editor-menu", (menu, editor) => {
 				this.addEditorMenuItems(menu, editor);
-			}),
-		);
-
-		// Right-click a rendered link, in reading view or live preview. This
-		// one hands over only the URL and no editor position, so there is
-		// nothing to replace in place - offering the citation on the clipboard
-		// is the useful thing it can do.
-		this.registerEvent(
-			this.app.workspace.on("url-menu", (menu, url) => {
-				this.addUrlMenuItems(menu, url);
 			}),
 		);
 
@@ -136,12 +126,17 @@ export default class PaperCitationsPlugin extends Plugin {
 	/**
 	 * Context-menu entries for a link under the cursor.
 	 *
-	 * Offered for any http(s) link rather than only ones a site resolver
-	 * claims. Whether a page is a citable document is not decidable without
-	 * fetching it - that is the whole point of the generic metadata tier, and
-	 * it is what makes ACL Anthology work - so gating the menu on the
-	 * resolver name would hide it for exactly the papers the generic tier
-	 * exists to handle.
+	 * Two entries, gated differently on purpose. "Convert to citation" is
+	 * offered for any http(s) link, because whether a page is a citable
+	 * document cannot be known without fetching it - that is the premise of
+	 * the generic metadata tier, and what makes ACL Anthology and most
+	 * publishers work. Gating it on the resolver name would hide the feature
+	 * for exactly the papers that tier exists to handle.
+	 *
+	 * The "as..." variant is only offered when a site or DOI resolver claims
+	 * the URL from its shape alone, so an ordinary web link adds one menu
+	 * entry rather than two. Picking a format is a refinement, and it stays
+	 * reachable from the command palette for everything else.
 	 */
 	private addEditorMenuItems(menu: Menu, editor: Editor): void {
 		const cursor = editor.getCursor();
@@ -156,6 +151,8 @@ export default class PaperCitationsPlugin extends Plugin {
 				.onClick(() => void this.convertUnderCursor(editor, this.settings.defaultTemplate)),
 		);
 
+		if (!isSpecificLink(found.url, this.resolvers)) return;
+
 		menu.addItem((item) =>
 			item
 				.setTitle("Convert to citation as...")
@@ -167,41 +164,6 @@ export default class PaperCitationsPlugin extends Plugin {
 					}).open();
 				}),
 		);
-	}
-
-	private addUrlMenuItems(menu: Menu, url: string): void {
-		if (!recognize(url.trim(), this.resolvers)) return;
-
-		menu.addItem((item) =>
-			item
-				.setTitle("Copy citation")
-				.setIcon("quote-glyph")
-				.setSection("paper-citations")
-				.onClick(() => void this.copyCitation(url.trim(), this.settings.defaultTemplate)),
-		);
-
-		menu.addItem((item) =>
-			item
-				.setTitle("Copy citation as...")
-				.setIcon("list")
-				.setSection("paper-citations")
-				.onClick(() => {
-					new PresetPickerModal(this.app, this.settings.presets, (preset) => {
-						void this.copyCitation(url.trim(), preset.template);
-					}).open();
-				}),
-		);
-	}
-
-	private async copyCitation(url: string, template: string): Promise<void> {
-		try {
-			const meta = await this.lookup(url);
-			const citation = this.format(meta, template);
-			await navigator.clipboard.writeText(citation);
-			new Notice(`Copied: ${citation}`);
-		} catch (error) {
-			new Notice(`Paper Citations: ${message(error)}`, 8000);
-		}
 	}
 
 	rebuildResolvers(): void {
@@ -338,10 +300,9 @@ export default class PaperCitationsPlugin extends Plugin {
 	 * note full of ordinary web links is left alone.
 	 */
 	private async convertAll(editor: Editor): Promise<void> {
-		const matches = findLinks(editor.getValue()).filter((m) => {
-			const hit = recognize(m.url, this.resolvers);
-			return hit !== null && hit.resolver !== "html" && hit.resolver !== "citoid";
-		});
+		const matches = findLinks(editor.getValue()).filter((m) =>
+			isSpecificLink(m.url, this.resolvers),
+		);
 
 		if (matches.length === 0) {
 			new Notice("Paper Citations: no paper links found in this note.");

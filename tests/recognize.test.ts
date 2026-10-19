@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { DEFAULT_SETTINGS } from "../src/defaults";
-import { buildResolvers, recognize } from "../src/resolvers/index";
+import { buildResolvers, isSpecificLink, recognize } from "../src/resolvers/index";
 import type { PaperCitationsSettings } from "../src/types";
 
 function resolvers(overrides: Partial<PaperCitationsSettings> = {}) {
@@ -176,6 +176,54 @@ describe("the generic tiers", () => {
 		expect(recognize("  https://arxiv.org/abs/1706.03762\n", chain)).toMatchObject({
 			resolver: "arxiv",
 		});
+	});
+});
+
+describe("telling a known paper URL from a merely plausible one", () => {
+	// Two callers depend on this distinction: the note-wide conversion only
+	// touches links it is confident about, and the right-click menu offers the
+	// format picker only for these.
+	it.each([
+		"https://arxiv.org/abs/1706.03762",
+		"https://arxiv.org/pdf/math/9404236",
+		"arXiv:2301.12345",
+		"https://doi.org/10.1038/nature14539",
+		"https://www.lesswrong.com/posts/vJ7ggyjuP4u2yHNcP/x",
+		"https://www.alignmentforum.org/posts/pdaGN6pQyQarFHXF4/x",
+		"https://openreview.net/forum?id=z71OSKqTFh7",
+	])("is confident about %s", (url) => {
+		expect(isSpecificLink(url, chain)).toBe(true);
+	});
+
+	it.each([
+		// Real papers, but only the generic metadata tier can know that, and
+		// only after fetching. They stay convertible - just not bulk-converted
+		// and without the picker entry.
+		"https://aclanthology.org/2023.acl-long.1/",
+		"https://www.biorxiv.org/content/10.1101/2020.01.01.891853v1",
+		// Not papers at all.
+		"https://example.com/page",
+		"https://news.ycombinator.com/item?id=1",
+	])("is not confident about %s", (url) => {
+		expect(isSpecificLink(url, chain)).toBe(false);
+	});
+
+	it("is not confident about text that is not a link", () => {
+		expect(isSpecificLink("just prose", chain)).toBe(false);
+		expect(isSpecificLink("", chain)).toBe(false);
+	});
+
+	it("stops being confident about a source the user switched off", () => {
+		const noArxiv = resolvers({
+			enabledResolvers: { ...DEFAULT_SETTINGS.enabledResolvers, arxiv: false },
+		});
+		expect(isSpecificLink("https://arxiv.org/abs/1706.03762", noArxiv)).toBe(false);
+	});
+
+	it("is never confident on the strength of Citoid alone", () => {
+		// Citoid claims any URL, so counting it would make every link look
+		// like a known paper.
+		expect(isSpecificLink("https://example.com/page", withCitoid)).toBe(false);
 	});
 });
 

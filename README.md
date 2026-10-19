@@ -95,17 +95,20 @@ changing your default. Author rendering is configured separately — full names,
 
 ### Right-click menu
 
-Right-clicking a link in the editor offers **Convert to citation** and
-**Convert to citation as...**. Right-clicking a rendered link — in reading view,
-or a live-preview link — offers **Copy citation** instead, since that event
-hands over only the URL with no position to replace.
+Right-clicking a link in the editor offers **Convert to citation**, and for
+arXiv, DOI, LessWrong, Alignment Forum, EA Forum and OpenReview links also
+**Convert to citation as...**.
 
-Both appear for any `http(s)` link, not only ones a site resolver claims.
-That's deliberate: whether a page is a citable document isn't decidable without
-fetching it, which is the entire premise of the generic metadata tier and what
-makes ACL Anthology work. Gating the menu on the resolver name would hide it for
-exactly the papers that tier exists to handle. A link that turns out not to be a
-paper costs one menu entry; the reverse costs the feature.
+The two entries are gated differently on purpose. Converting is offered for any
+`http(s)` link, because whether a page is a citable document isn't decidable
+without fetching it — that's the premise of the generic metadata tier, and what
+makes ACL Anthology and most publishers work. Gating it on the resolver name
+would hide the feature for exactly the papers that tier exists to handle.
+
+The format picker is offered only where a resolver recognizes the URL from its
+shape alone, so an ordinary web link adds one menu entry rather than two.
+Picking a format is a refinement, and it stays available from the command
+palette for everything else.
 
 ## How the paste works
 
@@ -154,7 +157,7 @@ npm install
 echo 'C:\path\to\your\vault' > .vault-path   # or set OBSIDIAN_VAULT
 npm run dev      # watch, building straight into the vault
 npm run build    # typecheck, then minified build
-npm test         # 189 offline tests
+npm test         # 203 offline tests
 npm run smoke    # hits the real services; see below
 ```
 
