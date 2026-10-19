@@ -158,6 +158,49 @@ describe("template variables", () => {
 		expect(sparse.journal_ref).toBe("");
 	});
 
+	it("keeps {{abstract}} strict and lets {{summary}} fall back", () => {
+		// A paper with a real abstract: both are the abstract.
+		const withAbstract = buildVars({ ...paper, abstract: "We propose a thing." }, fmt);
+		expect(withAbstract.abstract).toBe("We propose a thing.");
+		expect(withAbstract.summary).toBe("We propose a thing.");
+
+		// A post with only an excerpt: {{abstract}} stays empty so a template
+		// asking for an abstract gets nothing rather than something else,
+		// while {{summary}} gives a card something to show.
+		const withExcerpt = buildVars({ ...post, description: "The opening paragraph." }, fmt);
+		expect(withExcerpt.abstract).toBe("");
+		expect(withExcerpt.description).toBe("The opening paragraph.");
+		expect(withExcerpt.summary).toBe("The opening paragraph.");
+
+		// Neither: everything is empty and conditionals drop.
+		expect(buildVars(post, fmt).summary).toBe("");
+	});
+
+	it("prefers the abstract over the description in {{summary}}", () => {
+		const both = buildVars(
+			{ ...paper, abstract: "The real abstract.", description: "A blurb." },
+			fmt,
+		);
+		expect(both.summary).toBe("The real abstract.");
+	});
+
+	it("exposes arXiv's comment and categories", () => {
+		const vars = buildVars(
+			{ ...paper, comment: "Accepted at NeurIPS 2017", categories: ["cs.CL", "cs.LG"] },
+			fmt,
+		);
+		expect(vars.comment).toBe("Accepted at NeurIPS 2017");
+		expect(vars.categories).toBe("cs.CL, cs.LG");
+		expect(vars.primary_category).toBe("cs.CL");
+	});
+
+	it("collapses a wrapped abstract to one line", () => {
+		// arXiv hard-wraps abstracts; a callout wants a single line it can
+		// wrap itself, not embedded newlines that would break out of it.
+		const vars = buildVars({ ...paper, abstract: "One line.\n  Then another.\n" }, fmt);
+		expect(vars.abstract).toBe("One line. Then another.");
+	});
+
 	it("builds a DOI link only when there is a DOI", () => {
 		expect(buildVars({ ...paper, doi: "10.1038/nature14539" }, fmt).doi_url).toBe(
 			"https://doi.org/10.1038/nature14539",
@@ -238,6 +281,65 @@ describe("the shipped presets", () => {
 		expect(render(byName("With format links"), buildVars(post, fmt))).toBe(
 			"TurnTrout, *Reward is not the optimization target*. \\[[abs]\\](https://www.alignmentforum.org/posts/pdaGN6pQyQarFHXF4/x)",
 		);
+	});
+
+	it("renders the paper card with every optional part present", () => {
+		const full = {
+			...paper,
+			abstract: "We propose a new architecture.",
+			comment: "Accepted at NeurIPS 2017",
+			doi: "10.5555/attention",
+		};
+
+		expect(render(byName("Paper card"), buildVars(full, fmt))).toBe(
+			[
+				"> [!abstract] [Attention Is All You Need](https://arxiv.org/abs/1706.03762v7)",
+				"> Ashish Vaswani et al. (2017) · arXiv",
+				"> *Accepted at NeurIPS 2017*",
+				">",
+				"> We propose a new architecture.",
+				">",
+				"> [abs](https://arxiv.org/abs/1706.03762v7) · [pdf](https://arxiv.org/pdf/1706.03762v7) · [doi](https://doi.org/10.5555/attention)",
+			].join("\n"),
+		);
+	});
+
+	it("renders the paper card for a source with no pdf, doi or comment", () => {
+		// Each optional part carries its own newline inside the conditional,
+		// so dropping one must not leave a bare `>` line behind.
+		const withExcerpt = { ...post, description: "The first paragraph of the post." };
+
+		expect(render(byName("Paper card"), buildVars(withExcerpt, fmt))).toBe(
+			[
+				"> [!abstract] [Reward is not the optimization target](https://www.alignmentforum.org/posts/pdaGN6pQyQarFHXF4/x)",
+				"> TurnTrout (2022) · Alignment Forum",
+				">",
+				"> The first paragraph of the post.",
+				">",
+				"> [abs](https://www.alignmentforum.org/posts/pdaGN6pQyQarFHXF4/x)",
+			].join("\n"),
+		);
+	});
+
+	it("renders the paper card with no summary at all", () => {
+		expect(render(byName("Paper card"), buildVars(paper, fmt))).toBe(
+			[
+				"> [!abstract] [Attention Is All You Need](https://arxiv.org/abs/1706.03762v7)",
+				"> Ashish Vaswani et al. (2017) · arXiv",
+				">",
+				"> [abs](https://arxiv.org/abs/1706.03762v7) · [pdf](https://arxiv.org/pdf/1706.03762v7)",
+			].join("\n"),
+		);
+	});
+
+	it("never leaves an empty callout line in the card", () => {
+		for (const meta of [paper, post, { ...paper, abstract: "x" }, { ...post, description: "y" }]) {
+			const lines = render(byName("Paper card"), buildVars(meta, fmt)).split("\n");
+			// Every line belongs to the callout, and none is a lone marker
+			// followed by another lone marker.
+			expect(lines.every((l) => l.startsWith(">"))).toBe(true);
+			expect(lines.join("\n")).not.toContain(">\n>\n");
+		}
 	});
 
 	it("renders every preset without leaving template syntax behind", () => {

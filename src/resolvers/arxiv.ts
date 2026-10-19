@@ -91,6 +91,12 @@ export function createArxivResolver(recognizeBareIds: boolean): Resolver {
 				venue: "arXiv",
 				journalRef: textByLocalName(entry, "journal_ref"),
 				abstract: textByLocalName(entry, "summary"),
+				// Often says where the paper was published, which is exactly
+				// the kind of thing a card wants: "Accepted at NeurIPS 2023".
+				comment: textByLocalName(entry, "comment"),
+				categories: childrenByLocalName(entry, "category")
+					.map((el) => el.getAttribute("term"))
+					.filter((term): term is string => Boolean(term)),
 				site: "arxiv.org",
 				source: "arxiv",
 			};

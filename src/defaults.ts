@@ -29,6 +29,22 @@ export const DEFAULT_PRESETS = [
 		name: "Author, year, title",
 		template: "{{authors}} ({{year}}). [{{title}}]({{abs_url}})",
 	},
+	{
+		// Multi-line, and every optional part carries its own newline inside
+		// the conditional so a source that lacks it leaves no blank `>` line
+		// behind. `{{summary}}` rather than `{{abstract}}` so a forum post
+		// gets its excerpt instead of an empty callout.
+		name: "Paper card",
+		template: [
+			"> [!abstract] [{{title}}]({{abs_url}})",
+			"> {{authors}}{{#year}} ({{year}}){{/year}}{{#venue}} · {{venue}}{{/venue}}{{#comment}}",
+			"> *{{comment}}*{{/comment}}{{#summary}}",
+			">",
+			"> {{summary}}{{/summary}}",
+			">",
+			"> [abs]({{abs_url}}){{#pdf_url}} · [pdf]({{pdf_url}}){{/pdf_url}}{{#doi_url}} · [doi]({{doi_url}}){{/doi_url}}",
+		].join("\n"),
+	},
 ];
 
 export const DEFAULT_SETTINGS: PaperCitationsSettings = {

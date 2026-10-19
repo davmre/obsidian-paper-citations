@@ -104,3 +104,38 @@ describe("upstream services", () => {
 		expect(result.error.message).not.toMatch(/Verifying your browser/);
 	});
 });
+
+describe("abstract and summary coverage", () => {
+	/**
+	 * Which sources actually carry a usable summary, checked live. This is the
+	 * table the README's coverage claims rest on, so it is worth asserting
+	 * rather than assuming.
+	 */
+	it("arXiv carries a full abstract", async () => {
+		const meta = await resolveText("https://arxiv.org/abs/1706.03762", chain, ctx);
+
+		expect(meta.abstract).toContain("dominant sequence transduction models");
+		// Long enough to be the real abstract, not a truncated blurb.
+		expect(meta.abstract!.length).toBeGreaterThan(500);
+		await pause();
+	});
+
+	it("LessWrong carries an excerpt, and no abstract", async () => {
+		const meta = await resolveText(
+			"https://www.lesswrong.com/posts/vJ7ggyjuP4u2yHNcP/x",
+			chain,
+			ctx,
+		);
+
+		expect(meta.abstract).toBeUndefined();
+		expect(meta.description!.length).toBeGreaterThan(300);
+	});
+
+	it("ACL Anthology yields no summary rather than its author list", async () => {
+		// Its og:description is the authors plus the proceedings title.
+		const meta = await resolveText("https://aclanthology.org/2023.acl-long.1/", chain, ctx);
+
+		expect(meta.abstract).toBeUndefined();
+		expect(meta.description).toBeUndefined();
+	});
+});

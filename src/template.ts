@@ -36,6 +36,15 @@ export function buildVars(
 		venue: meta.venue ?? "",
 		journal_ref: meta.journalRef ?? "",
 		abstract: collapse(meta.abstract ?? ""),
+		description: collapse(meta.description ?? ""),
+		// One variable that does the right thing per source: a real abstract
+		// where there is one, otherwise the page's own summary. Card templates
+		// want this; `{{abstract}}` stays strict for anyone who wants only a
+		// genuine abstract and nothing in its place.
+		summary: collapse(meta.abstract ?? meta.description ?? ""),
+		comment: collapse(meta.comment ?? ""),
+		categories: (meta.categories ?? []).join(", "),
+		primary_category: meta.categories?.[0] ?? "",
 		site: meta.site ?? "",
 		selection,
 	};
@@ -76,5 +85,6 @@ export function render(template: string, vars: TemplateVars): string {
 export const TEMPLATE_VARIABLES = [
 	"title", "authors", "authors_full", "first_author", "first_author_last",
 	"year", "date", "url", "abs_url", "pdf_url", "doi", "doi_url",
-	"id", "venue", "journal_ref", "abstract", "site", "selection",
+	"id", "venue", "journal_ref", "comment", "categories", "primary_category",
+	"summary", "abstract", "description", "site", "selection",
 ] as const;

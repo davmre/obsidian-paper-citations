@@ -1,4 +1,4 @@
-import { parseAuthor } from "../authors";
+import { fullName, parseAuthor } from "../authors";
 import { hostOf, httpText, parseDocument } from "../http";
 import { cleanDoi, resolveDoi } from "./crossref";
 import type { Author, FetchContext, PaperMetadata, Recognized, Resolver } from "../types";
@@ -25,6 +25,9 @@ const HIGHWIRE = {
 	authorList: "citation_authors",
 	date: ["citation_publication_date", "citation_date", "citation_online_date"],
 	doi: "citation_doi",
+	// Only the text tag. `citation_abstract_html_url` is a link to the
+	// abstract page, not the abstract itself.
+	abstract: "citation_abstract",
 	pdf: "citation_pdf_url",
 	venue: [
 		"citation_journal_title",
@@ -260,7 +263,7 @@ export function scrapeMetadata(doc: Document, url: string): PaperMetadata | null
 	const authors: Author[] = authorNames.map(parseAuthor);
 	const doi = firstMeta(doc, HIGHWIRE.doi);
 
-	return {
+	const scraped: PaperMetadata = {
 		title: cleaned,
 		authors,
 		date,
@@ -268,9 +271,67 @@ export function scrapeMetadata(doc: Document, url: string): PaperMetadata | null
 		pdfUrl: firstMeta(doc, HIGHWIRE.pdf),
 		doi: doi ? cleanDoi(doi) : undefined,
 		venue,
+		// Only tags that claim to *be* an abstract count as one.
+		abstract: firstMeta(doc, HIGHWIRE.abstract) ?? jsonLdAbstract(doc),
 		site: host,
 		source: `html:${tier}`,
 	};
+
+	// `og:description` is whatever the site decided to put there: the
+	// abstract, the author list, or a truncated excerpt. Keep it only when it
+	// adds something the metadata does not already say.
+	const described = firstMeta(doc, [
+		"og:description",
+		"description",
+		"DC.description",
+		"dcterms.abstract",
+	]);
+	if (described && !isRedundantDescription(described, scraped)) {
+		scraped.description = described;
+	}
+
+	return scraped;
+}
+
+/**
+ * True when a scraped description just restates the citation.
+ *
+ * A very common publisher pattern is to fill `og:description` with the author
+ * list and the proceedings title - ACL Anthology's reads "Yajiao Liu, Xin
+ * Jiang, ... Proceedings of the 61st Annual Meeting ... 2023." Passing that
+ * along as a summary puts the authors in the body of a card directly under the
+ * authors in its header, which is worse than having no summary at all.
+ *
+ * Works by removing everything already known from the text and seeing whether
+ * anything substantial is left. A description that really is an abstract
+ * survives this easily; one assembled from metadata does not.
+ */
+function isRedundantDescription(description: string, meta: PaperMetadata): boolean {
+	const known = [
+		meta.title,
+		meta.venue,
+		meta.journalRef,
+		meta.date?.match(/\d{4}/)?.[0],
+		...meta.authors.map(fullName),
+		...meta.authors.map((a) => a.family),
+	];
+
+	let remainder = description;
+	for (const piece of known) {
+		if (piece && piece.length > 2) remainder = remainder.split(piece).join(" ");
+	}
+	// Whatever is left is only punctuation and joining words if the
+	// description was assembled rather than written.
+	remainder = remainder.replace(/[\s.,;:|()[\]{}·—–-]+/g, " ").trim();
+
+	return remainder.length < 40 || remainder.length < description.length * 0.3;
+}
+
+/** A JSON-LD `abstract`, which some publishers emit and which is trustworthy. */
+function jsonLdAbstract(doc: Document): string | undefined {
+	const article = readJsonLd(doc) as (JsonLdArticle & { abstract?: unknown }) | undefined;
+	const value = article?.abstract;
+	return typeof value === "string" && value.trim() ? value.trim() : undefined;
 }
 
 /** Prefer registry values, keep scraped ones where the registry is silent. */
@@ -285,6 +346,9 @@ function merge(registry: PaperMetadata, scraped: PaperMetadata): PaperMetadata {
 		pdfUrl: registry.pdfUrl ?? scraped.pdfUrl,
 		venue: registry.venue ?? scraped.venue,
 		abstract: registry.abstract ?? scraped.abstract,
+		description: registry.description ?? scraped.description,
+		comment: registry.comment ?? scraped.comment,
+		categories: registry.categories ?? scraped.categories,
 		source: `${registry.source}+${scraped.source}`,
 	};
 }

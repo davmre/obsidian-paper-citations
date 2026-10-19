@@ -166,6 +166,127 @@ describe("LessWrong and the Alignment Forum", () => {
 	});
 });
 
+describe("abstracts and descriptions", () => {
+	it("takes the abstract, comment and categories from arXiv", async () => {
+		stubUrl("export.arxiv.org/api/query", fixture("arxiv-journal-ref.xml"));
+
+		const meta = await resolveText("https://arxiv.org/abs/astro-ph/9812133", chain(), ctx);
+
+		expect(meta.abstract).toContain("We report measurements of the mass density");
+		expect(meta.comment).toContain("Accepted for publication in the Astrophysical Journal");
+		expect(meta.categories?.[0]).toMatch(/astro-ph/);
+	});
+
+	it("takes a forum post's excerpt as a description, not an abstract", async () => {
+		// A post has no abstract. Its GraphQL excerpt runs to ~2000 characters,
+		// where the og:description on the page is truncated at about 160.
+		stubUrl(
+			"lesswrong.com/graphql",
+			JSON.stringify({
+				data: {
+					post: {
+						result: {
+							_id: "pdaGN6pQyQarFHXF4",
+							title: "A Post",
+							slug: "a-post",
+							postedAt: "2022-09-28T01:20:11.605Z",
+							user: { displayName: "Diffractor" },
+							coauthors: [],
+							contents: { plaintextDescription: "The first few paragraphs of the post." },
+						},
+					},
+				},
+			}),
+		);
+
+		const meta = await resolveText(
+			"https://www.lesswrong.com/posts/pdaGN6pQyQarFHXF4/x",
+			chain(),
+			ctx,
+		);
+
+		expect(meta.description).toBe("The first few paragraphs of the post.");
+		expect(meta.abstract).toBeUndefined();
+	});
+
+	it("treats citation_abstract as a real abstract", async () => {
+		stubUrl(
+			"example.com",
+			`<html><head><meta name="citation_title" content="A Paper">
+			<meta name="citation_abstract" content="We prove a thing about things."></head></html>`,
+		);
+
+		const meta = await resolveText("https://example.com/x", chain(), ctx);
+
+		expect(meta.abstract).toBe("We prove a thing about things.");
+	});
+
+	it("keeps an og:description that is genuinely a summary", async () => {
+		stubUrl(
+			"example.com",
+			`<html><head><meta name="citation_title" content="A Paper">
+			<meta name="citation_author" content="Smith, Jane">
+			<meta property="og:description" content="We introduce a method for estimating widget density from noisy observations, and show it beats the state of the art on three benchmarks."></head></html>`,
+		);
+
+		const meta = await resolveText("https://example.com/x", chain(), ctx);
+
+		expect(meta.description).toContain("estimating widget density");
+		// It is a description, not an abstract: nothing claimed it was one.
+		expect(meta.abstract).toBeUndefined();
+	});
+
+	it("discards an og:description that only restates the citation", async () => {
+		// ACL Anthology's real shape: the author list plus the proceedings
+		// title. Repeating that under the authors in a card is worse than
+		// showing no summary.
+		stubUrl("aclanthology.org", fixture("acl-paper.html"));
+
+		const meta = await resolveText("https://aclanthology.org/2023.acl-long.1/", chain(), ctx);
+
+		expect(meta.title).toContain("One Cannot Stand for Everyone");
+		expect(meta.abstract).toBeUndefined();
+		expect(meta.description).toBeUndefined();
+	});
+
+	it("discards a description that is just the title again", async () => {
+		stubUrl(
+			"example.com",
+			`<html><head><meta name="citation_title" content="Attention Is All You Need">
+			<meta property="og:description" content="Attention Is All You Need"></head></html>`,
+		);
+
+		const meta = await resolveText("https://example.com/x", chain(), ctx);
+
+		expect(meta.description).toBeUndefined();
+	});
+
+	it("prefers a registry abstract over a scraped description", async () => {
+		stubUrl(
+			"publisher.example",
+			`<html><head><meta name="citation_title" content="Deep learning">
+			<meta name="citation_doi" content="10.1038/nature14539">
+			<meta property="og:description" content="Read this landmark review of deep learning methods and their many applications across science."></head></html>`,
+		);
+		stubUrl(
+			"api.crossref.org",
+			JSON.stringify({
+				message: {
+					title: ["Deep learning"],
+					author: [],
+					DOI: "10.1038/nature14539",
+					abstract: "<jats:p>Deep learning allows computational models to learn representations.</jats:p>",
+				},
+			}),
+		);
+
+		const meta = await resolveText("https://publisher.example/article", chain(), ctx);
+
+		expect(meta.abstract).toContain("learn representations");
+		expect(meta.description).toContain("landmark review");
+	});
+});
+
 describe("OpenReview", () => {
 	it("reads a note from the api2 payload shape", async () => {
 		// api2 wraps every content field as `{ value: ... }`.

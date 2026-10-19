@@ -56,10 +56,11 @@ Substitution is literal — no escaping of any kind — so wikilinks, `\[` escap
 and arbitrary markdown pass through untouched.
 
 ```
-{{title}}  {{authors}}  {{authors_full}}  {{first_author}}  {{first_author_last}}
-{{year}}   {{date}}     {{url}}           {{abs_url}}       {{pdf_url}}
-{{doi}}    {{doi_url}}  {{id}}            {{venue}}         {{journal_ref}}
-{{abstract}}  {{site}}  {{selection}}
+{{title}}    {{authors}}   {{authors_full}}  {{first_author}}  {{first_author_last}}
+{{year}}     {{date}}      {{url}}           {{abs_url}}       {{pdf_url}}
+{{doi}}      {{doi_url}}   {{id}}            {{venue}}         {{journal_ref}}
+{{comment}}  {{categories}}  {{primary_category}}
+{{summary}}  {{abstract}}  {{description}}   {{site}}          {{selection}}
 ```
 
 `{{#name}}...{{/name}}` keeps its body only when `name` is non-empty. You need
@@ -77,10 +78,58 @@ Ashish Vaswani et al., *Attention Is All You Need*. \[[abs]\](…) \[[pdf]\](…
 TurnTrout, *Reward is not the optimization target*. \[[abs]\](…)
 ```
 
-Five formats ship as editable presets, reachable from the **Paste citation
+Six formats ship as editable presets, reachable from the **Paste citation
 as...** command when you want a different one for a single paste without
 changing your default. Author rendering is configured separately — full names,
 `et al.` past a threshold, surnames only, or initials, with your own separators.
+
+### Summaries, and the three variables for them
+
+`{{abstract}}` is strict: it's only set when a source gives something that
+claims to *be* an abstract. `{{description}}` is the looser page summary.
+`{{summary}}` is the abstract if there is one, otherwise the description —
+that's the one a card wants.
+
+The distinction isn't pedantry; the fields genuinely aren't interchangeable:
+
+| Source | `{{abstract}}` | `{{description}}` |
+| --- | --- | --- |
+| arXiv | full abstract, always | — |
+| Crossref / DataCite | when the publisher deposited one, which is often not | — |
+| OpenReview | yes (when reachable) | — |
+| LessWrong / AF / EA Forum | — | ~2000-char excerpt from the API |
+| Pages with `citation_abstract` or JSON-LD `abstract` | yes | — |
+| Other pages | — | `og:description`, if it survives the check below |
+
+Two things worth knowing. A page's `og:description` is whatever the site chose
+to put there, and for many publishers that's the citation restated — ACL
+Anthology's is the author list followed by the proceedings title. Passing that
+through would print the authors in a card's body directly beneath the authors in
+its header, so a description that merely restates the title, authors, venue and
+year is **discarded** rather than shown. And LessWrong truncates its own
+`og:description` at about 160 characters, which is why its resolver pulls the
+excerpt from the API instead.
+
+### Paper card
+
+The `Paper card` preset renders a callout, degrading cleanly as fields go
+missing:
+
+```markdown
+> [!abstract] [Attention Is All You Need](https://arxiv.org/abs/1706.03762v7)
+> Ashish Vaswani et al. (2017) · arXiv
+> *Accepted at NeurIPS 2017*
+>
+> The dominant sequence transduction models are based on complex recurrent…
+>
+> [abs](…) · [pdf](…) · [doi](…)
+```
+
+Every optional part carries its own newline inside its conditional, so a
+LessWrong post — no PDF, no DOI, no comment — gets a card with no stray `>`
+lines, and a paper with no abstract loses the body rather than gaining a blank
+one. `{{comment}}` is arXiv's author comment, which frequently says where a
+paper was published.
 
 ## Commands
 
@@ -157,7 +206,7 @@ npm install
 echo 'C:\path\to\your\vault' > .vault-path   # or set OBSIDIAN_VAULT
 npm run dev      # watch, building straight into the vault
 npm run build    # typecheck, then minified build
-npm test         # 203 offline tests
+npm test         # 218 offline tests
 npm run smoke    # hits the real services; see below
 ```
 

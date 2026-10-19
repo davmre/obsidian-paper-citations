@@ -30,6 +30,7 @@ const QUERY = `query Post($id: String!) {
       title
       slug
       postedAt
+      contents { plaintextDescription }
       user { displayName username }
       coauthors { displayName username }
     }
@@ -49,6 +50,7 @@ interface ForumResponse {
 				title?: string | null;
 				slug?: string | null;
 				postedAt?: string | null;
+				contents?: { plaintextDescription?: string | null } | null;
 				user?: ForumUser | null;
 				coauthors?: ForumUser[] | null;
 			} | null;
@@ -106,6 +108,9 @@ export const forumMagnumResolver: Resolver = {
 			title: post.title,
 			authors: names.map(parseAuthor),
 			date: post.postedAt ?? undefined,
+			// A post has no abstract, but this excerpt is far longer and
+			// cleaner than the truncated og:description on the page.
+			description: post.contents?.plaintextDescription ?? undefined,
 			url: post.slug ? `${origin}/posts/${post._id}/${post.slug}` : hit.url,
 			id: post._id,
 			venue: host === "www.lesswrong.com" ? "LessWrong"

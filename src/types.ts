@@ -29,7 +29,23 @@ export interface PaperMetadata {
 	venue?: string;
 	/** arXiv's journal_ref / Crossref's container, verbatim. */
 	journalRef?: string;
+	/**
+	 * A genuine abstract: arXiv's summary, a Crossref/DataCite abstract, an
+	 * OpenReview abstract, or a page's own `citation_abstract`. Never a
+	 * scraped page summary - see `description`.
+	 */
 	abstract?: string;
+	/**
+	 * A looser page summary: `og:description`, Dublin Core description, a
+	 * forum post's excerpt. Kept apart from `abstract` because the two are
+	 * not interchangeable - ACL Anthology's `og:description` is the author
+	 * list, and LessWrong truncates its own at about 160 characters.
+	 */
+	description?: string;
+	/** arXiv's author comment, e.g. "Accepted at NeurIPS 2023". */
+	comment?: string;
+	/** Subject categories, source-native, e.g. ["cs.CL", "cs.LG"]. */
+	categories?: string[];
 	/** Hostname the metadata came from, for display and debugging. */
 	site?: string;
 	/** Which resolver produced this, for debugging and tests. */
