@@ -93,6 +93,20 @@ changing your default. Author rendering is configured separately — full names,
 | Convert all paper links in note | bulk convert; skips links no specific resolver claims |
 | Toggle converting links on paste | |
 
+### Right-click menu
+
+Right-clicking a link in the editor offers **Convert to citation** and
+**Convert to citation as...**. Right-clicking a rendered link — in reading view,
+or a live-preview link — offers **Copy citation** instead, since that event
+hands over only the URL with no position to replace.
+
+Both appear for any `http(s)` link, not only ones a site resolver claims.
+That's deliberate: whether a page is a citable document isn't decidable without
+fetching it, which is the entire premise of the generic metadata tier and what
+makes ACL Anthology work. Gating the menu on the resolver name would hide it for
+exactly the papers that tier exists to handle. A link that turns out not to be a
+paper costs one menu entry; the reverse costs the feature.
+
 ## How the paste works
 
 On paste the raw URL goes in **immediately**, then gets replaced once the fetch
@@ -107,6 +121,18 @@ note is worse than a link that stayed a link.
 Pastes are left alone inside code fences, inline code spans and frontmatter, and
 when the clipboard holds anything other than a single bare URL — so re-pasting a
 citation this plugin produced comes through untouched.
+
+They're also left alone **inside markdown link syntax**, which matters when
+you're writing a link by hand. Typing `see [this paper](` and pasting gives you
+the URL in the destination, as copied — expanding it there would produce
+`[this paper]([Authors (Year). Title](url))` and throw away the link text you
+just wrote. The same applies while the cursor is in link text, in a wikilink, or
+after a `[ref]:` definition. Use **Convert link under cursor** afterwards if you
+change your mind.
+
+The one accepted false positive: an unclosed `[` anywhere earlier on the line
+looks like link text being written, so pasting after `the interval [0, 1` won't
+expand. The paste still happens; only the expansion is skipped.
 
 **One known wart:** because the replacement is asynchronous, undo takes two
 steps — one for the citation, one for the paste.

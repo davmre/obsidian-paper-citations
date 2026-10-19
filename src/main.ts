@@ -2,9 +2,9 @@ import {
 	Editor,
 	MarkdownFileInfo,
 	MarkdownView,
+	Menu,
 	Notice,
 	Plugin,
-	type EditorPosition,
 } from "obsidian";
 import { MetadataCache } from "./cache";
 import { DEFAULT_SETTINGS } from "./defaults";
@@ -48,6 +48,23 @@ export default class PaperCitationsPlugin extends Plugin {
 		this.registerEvent(
 			this.app.workspace.on("editor-paste", (evt, editor, info) => {
 				this.onPaste(evt, editor, info);
+			}),
+		);
+
+		// Right-click inside the editor, on or just after a link.
+		this.registerEvent(
+			this.app.workspace.on("editor-menu", (menu, editor) => {
+				this.addEditorMenuItems(menu, editor);
+			}),
+		);
+
+		// Right-click a rendered link, in reading view or live preview. This
+		// one hands over only the URL and no editor position, so there is
+		// nothing to replace in place - offering the citation on the clipboard
+		// is the useful thing it can do.
+		this.registerEvent(
+			this.app.workspace.on("url-menu", (menu, url) => {
+				this.addUrlMenuItems(menu, url);
 			}),
 		);
 
@@ -114,6 +131,77 @@ export default class PaperCitationsPlugin extends Plugin {
 				);
 			},
 		});
+	}
+
+	/**
+	 * Context-menu entries for a link under the cursor.
+	 *
+	 * Offered for any http(s) link rather than only ones a site resolver
+	 * claims. Whether a page is a citable document is not decidable without
+	 * fetching it - that is the whole point of the generic metadata tier, and
+	 * it is what makes ACL Anthology work - so gating the menu on the
+	 * resolver name would hide it for exactly the papers the generic tier
+	 * exists to handle.
+	 */
+	private addEditorMenuItems(menu: Menu, editor: Editor): void {
+		const cursor = editor.getCursor();
+		const found = linkAt(editor.getLine(cursor.line), cursor.ch);
+		if (!found || !recognize(found.url, this.resolvers)) return;
+
+		menu.addItem((item) =>
+			item
+				.setTitle("Convert to citation")
+				.setIcon("quote-glyph")
+				.setSection("paper-citations")
+				.onClick(() => void this.convertUnderCursor(editor, this.settings.defaultTemplate)),
+		);
+
+		menu.addItem((item) =>
+			item
+				.setTitle("Convert to citation as...")
+				.setIcon("list")
+				.setSection("paper-citations")
+				.onClick(() => {
+					new PresetPickerModal(this.app, this.settings.presets, (preset) => {
+						void this.convertUnderCursor(editor, preset.template);
+					}).open();
+				}),
+		);
+	}
+
+	private addUrlMenuItems(menu: Menu, url: string): void {
+		if (!recognize(url.trim(), this.resolvers)) return;
+
+		menu.addItem((item) =>
+			item
+				.setTitle("Copy citation")
+				.setIcon("quote-glyph")
+				.setSection("paper-citations")
+				.onClick(() => void this.copyCitation(url.trim(), this.settings.defaultTemplate)),
+		);
+
+		menu.addItem((item) =>
+			item
+				.setTitle("Copy citation as...")
+				.setIcon("list")
+				.setSection("paper-citations")
+				.onClick(() => {
+					new PresetPickerModal(this.app, this.settings.presets, (preset) => {
+						void this.copyCitation(url.trim(), preset.template);
+					}).open();
+				}),
+		);
+	}
+
+	private async copyCitation(url: string, template: string): Promise<void> {
+		try {
+			const meta = await this.lookup(url);
+			const citation = this.format(meta, template);
+			await navigator.clipboard.writeText(citation);
+			new Notice(`Copied: ${citation}`);
+		} catch (error) {
+			new Notice(`Paper Citations: ${message(error)}`, 8000);
+		}
 	}
 
 	rebuildResolvers(): void {

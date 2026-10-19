@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import { findLinks, linkAt } from "../src/links";
 import {
 	insertPlaceholder,
+	isInLinkSyntax,
 	isProtectedContext,
 	looksLikePlainUrl,
 	replacePlaceholder,
@@ -128,11 +129,70 @@ describe("contexts where a URL must be left alone", () => {
 		expect(isProtectedContext(editor.as(), { line: 2, ch: 0 })).toBe(false);
 	});
 
+	it("leaves a link destination alone", () => {
+		// The case this exists for: writing `see [this paper](` by hand and
+		// pasting the URL. Expanding it there would nest a citation inside the
+		// destination and lose the link text.
+		const editor = new FakeEditor("see [this paper]()");
+		const inside = "see [this paper](".length;
+
+		expect(isProtectedContext(editor.as(), { line: 0, ch: inside })).toBe(true);
+	});
+
 	it("leaves an inline code span alone", () => {
 		const editor = new FakeEditor("run `curl X` then paste");
 		expect(isProtectedContext(editor.as(), { line: 0, ch: 8 })).toBe(true);
 		// After the closing backtick the count is even again.
 		expect(isProtectedContext(editor.as(), { line: 0, ch: 20 })).toBe(false);
+	});
+});
+
+describe("recognizing markdown link syntax", () => {
+	it.each([
+		// An open destination, which is the case that prompted this.
+		["see [this paper](", "pasting into an empty destination"],
+		["see [this paper](<", "an angle-bracket destination"],
+		["[a](one) and [b](", "a second link after a finished one"],
+		["![diagram](", "an image destination"],
+		['[a](url "', "a link title"],
+		// Open link text.
+		["see [", "an empty link text"],
+		["see [this ", "part-written link text"],
+		["![", "image alt text"],
+		["see [[", "a wikilink"],
+		// Reference definitions.
+		["[ref]: ", "a reference definition"],
+		["  [ref]:", "an indented reference definition"],
+	])("suppresses in %s (%s)", (before) => {
+		expect(isInLinkSyntax(before)).toBe(true);
+	});
+
+	it.each([
+		["", "an empty line"],
+		["see ", "plain prose"],
+		["see [this paper](url) and ", "after a completed link"],
+		["see [this](a) [that](b) ", "after two completed links"],
+		["- [ ] a task ", "a task list marker"],
+		["see [1] and ", "a bracketed footnote marker"],
+		["see [[a note]] and ", "after a wikilink"],
+		["read ", "ordinary text"],
+	])("allows expansion in %s (%s)", (before) => {
+		expect(isInLinkSyntax(before)).toBe(false);
+	});
+
+	it("still allows a destination containing parentheses to close", () => {
+		// A URL with a paren in it closes the destination like any other, so
+		// text after the link is not treated as inside it.
+		expect(isInLinkSyntax("see [wiki](https://en.wikipedia.org/wiki/Foo_(bar)) then ")).toBe(
+			false,
+		);
+	});
+
+	it("treats a bare bracket in prose as link text", () => {
+		// Accepted false positive: an unclosed `[` is indistinguishable from
+		// link text being written. The paste still happens, just unexpanded,
+		// and the commands remain available.
+		expect(isInLinkSyntax("the interval [0, 1")).toBe(true);
 	});
 });
 

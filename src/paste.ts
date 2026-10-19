@@ -1,16 +1,55 @@
 import type { Editor, EditorPosition } from "obsidian";
 
 /**
+ * True when the cursor sits inside markdown link syntax, where a citation
+ * would be nonsense.
+ *
+ * The case that matters: writing `see [this paper](` and then pasting. The URL
+ * belongs in the destination exactly as copied, and expanding it there yields
+ * `[this paper]([Authors (Year). Title](url))`, which is broken markdown and
+ * loses the link text you just wrote. The same applies inside the link text
+ * itself, and inside a reference-style definition.
+ *
+ * Operates on the text before the cursor on one line, since a destination
+ * cannot span lines in practice.
+ */
+export function isInLinkSyntax(before: string): boolean {
+	// A reference-style definition: `[label]: ` with the destination to come.
+	if (/^\s{0,3}!?\[[^\]]*\]:\s*$/.test(before)) return true;
+
+	// An open destination: the last `](` has no closing paren after it. URLs
+	// containing parens are fine here - we only care whether the destination
+	// has been closed yet, not how it is spelled.
+	const open = before.lastIndexOf("](");
+	if (open !== -1 && !before.includes(")", open + 2)) {
+		// Confirm it really is link syntax by finding the text's opener.
+		if (before.lastIndexOf("[", open) !== -1) return true;
+	}
+
+	// An unclosed `[`, so the cursor is in link text or a wikilink. Pasting a
+	// citation here would nest brackets inside brackets.
+	let depth = 0;
+	for (const char of before) {
+		if (char === "[") depth++;
+		else if (char === "]" && depth > 0) depth--;
+	}
+	return depth > 0;
+}
+
+/**
  * Markdown contexts where a URL is not prose and must be left exactly as
- * typed: fenced code, inline code, and the YAML frontmatter block.
+ * typed: fenced code, inline code, the YAML frontmatter block, and link
+ * syntax.
  */
 export function isProtectedContext(editor: Editor, cursor: EditorPosition): boolean {
 	const line = editor.getLine(cursor.line);
+	const before = line.slice(0, cursor.ch);
 
 	// Inline code: count backticks before the cursor on this line. An odd
 	// count means we are inside a span.
-	const before = line.slice(0, cursor.ch);
 	if ((before.match(/`/g) ?? []).length % 2 === 1) return true;
+
+	if (isInLinkSyntax(before)) return true;
 
 	let inFence = false;
 	let inFrontmatter = false;

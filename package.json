@@ -1,6 +1,6 @@
 {
   "name": "obsidian-paper-citations",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Turn pasted paper links (arXiv, DOI, LessWrong, and more) into formatted citations.",
   "main": "main.js",
   "type": "module",
